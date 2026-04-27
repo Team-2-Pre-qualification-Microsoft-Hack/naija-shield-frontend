@@ -141,13 +141,30 @@ export const users = [
 ];
 
 export const nigeriaHotspots = [
-  { city: "Lagos", intensity: 95, count: 512, x: 46, y: 78 },
-  { city: "Abuja", intensity: 72, count: 287, x: 53, y: 48 },
-  { city: "Kano", intensity: 58, count: 198, x: 62, y: 28 },
-  { city: "Port Harcourt", intensity: 45, count: 134, x: 44, y: 84 },
-  { city: "Ibadan", intensity: 38, count: 98, x: 42, y: 68 },
-  { city: "Enugu", intensity: 31, count: 78, x: 56, y: 72 },
+  { city: "Lagos",         intensity: 95, count: 512, lng: 3.3792,  lat: 6.5244  },
+  { city: "Abuja",         intensity: 72, count: 287, lng: 7.4951,  lat: 9.0579  },
+  { city: "Kano",          intensity: 58, count: 198, lng: 8.5247,  lat: 12.0022 },
+  { city: "Port Harcourt", intensity: 45, count: 134, lng: 7.0498,  lat: 4.8156  },
+  { city: "Ibadan",        intensity: 38, count: 98,  lng: 3.9470,  lat: 7.3775  },
+  { city: "Enugu",         intensity: 31, count: 78,  lng: 7.4950,  lat: 6.4584  },
 ];
+
+// Maps Nigerian state names (as in GeoJSON `name` property) to a threat intensity score
+export const nigeriaStateThreat: Record<string, number> = {
+  "Lagos":                       95,
+  "Oyo":                         38,
+  "Rivers":                      45,
+  "Federal Capital Territory":   72,
+  "Kano":                        58,
+  "Enugu":                       31,
+  "Kaduna":                      27,
+  "Delta":                       22,
+  "Ogun":                        18,
+  "Anambra":                     15,
+  "Akwa Ibom":                   12,
+  "Osun":                        10,
+  "Edo":                         9,
+};
 
 export const threatVelocity = [
   { hour: "00:00", sms: 12, voice: 3 },
