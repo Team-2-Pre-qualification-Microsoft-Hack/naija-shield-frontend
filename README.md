@@ -1,36 +1,56 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# NaijaShield Frontend (UI MVP)
 
-## Getting Started
+NaijaShield is a Trust, Safety, and Fraud Intelligence dashboard UI built with Next.js.
+This repository currently focuses on frontend UX and mock data flows, and is ready for API integration.
 
-First, run the development server:
+## Run Locally
+
+1. Install dependencies
+
+```bash
+npm install
+```
+
+2. Start the app
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+3. Open:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+http://localhost:3000
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Login (Normal Email + Password)
 
-## Learn More
+This MVP uses normal email/password fields on the login page.
 
-To learn more about Next.js, take a look at the following resources:
+- URL: `/login`
+- Enter any non-empty email and password to sign in
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Examples:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- `analyst@mtn.ng` + `password123`
+- `admin@naijashield.ng` + `password123`
+- `compliance@naijashield.ng` + `password123`
 
-## Deploy on Vercel
+Role behavior in current mock logic:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- If email contains `admin` → redirects to `/overview`
+- If email contains `compliance` → redirects to `/compliance`
+- Otherwise → redirects to `/overview`
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Available Routes
+
+- `/login` - Auth screen
+- `/overview` - Dashboard command center
+- `/threat-feed` - Threat table and details
+- `/compliance` - Compliance reports view
+- `/user-management` - User and role view
+- `/settings` - System settings placeholders
+
+## Notes for Team Members
+
+- UI is mock-data driven from `lib/mock-data.ts`
+- Real backend/auth integrations are pending
+- Logos/assets live in `public/`
