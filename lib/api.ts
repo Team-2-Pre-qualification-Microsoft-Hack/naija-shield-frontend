@@ -1,7 +1,7 @@
 import { getToken, getRefreshToken, setSession, clearSession, getUser } from "./auth";
 import type { AuthUser } from "./auth";
 
-const BASE = process.env.NEXT_PUBLIC_API_URL!;
+const BASE = process.env.NEXT_PUBLIC_BACKEND_URL!;
 
 async function refreshTokens(): Promise<string | null> {
   const refreshToken = getRefreshToken();
