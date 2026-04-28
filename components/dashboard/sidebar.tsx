@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -11,6 +12,8 @@ import {
   Settings,
   LogOut,
 } from "lucide-react";
+import { useAuth } from "@/context/auth-context";
+import { Spinner } from "@/components/ui/spinner";
 
 const navItems = [
   { href: "/overview", label: "Command Centre", icon: LayoutDashboard },
@@ -22,6 +25,13 @@ const navItems = [
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const { user, logout } = useAuth();
+  const [loggingOut, setLoggingOut] = useState(false);
+
+  async function handleLogout() {
+    setLoggingOut(true);
+    await logout();
+  }
 
   return (
     <aside
@@ -66,15 +76,30 @@ export default function Sidebar() {
         })}
       </nav>
 
-      <div className="px-2 py-4" style={{ borderTop: "1px solid #1a1a2e" }}>
-        <Link
-          href="/login"
-          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors"
-          style={{ background: "#13131f", color: "#6b7280" }}
+      <div className="px-2 py-4 space-y-2" style={{ borderTop: "1px solid #1a1a2e" }}>
+        {user && (
+          <div className="px-3 py-2.5 rounded-lg" style={{ background: "#0f0f1a" }}>
+            <p className="text-xs font-semibold truncate" style={{ color: "#f5ede8" }}>{user.name}</p>
+            <p className="text-[11px] truncate mt-0.5" style={{ color: "#6b7280" }}>{user.email}</p>
+            <span
+              className="inline-block mt-1.5 text-[10px] px-1.5 py-0.5 rounded"
+              style={{ background: "#e8581a15", color: "#e8581a" }}
+            >
+              {user.role.replace(/_/g, " ")}
+            </span>
+          </div>
+        )}
+        <button
+          onClick={handleLogout}
+          disabled={loggingOut}
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all"
+          style={{ background: "#1a0b0b", border: "1px solid #ef444428", color: "#ef4444", opacity: loggingOut ? 0.7 : 1 }}
+          onMouseEnter={(e) => { if (!loggingOut) { e.currentTarget.style.background = "#220d0d"; e.currentTarget.style.borderColor = "#ef444455"; } }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = "#1a0b0b"; e.currentTarget.style.borderColor = "#ef444428"; }}
         >
-          <LogOut size={16} />
-          Log out
-        </Link>
+          {loggingOut ? <Spinner className="h-3.75 w-3.75" /> : <LogOut size={15} />}
+          {loggingOut ? "Signing out…" : "Log out"}
+        </button>
       </div>
     </aside>
   );

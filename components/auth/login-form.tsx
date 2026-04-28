@@ -1,11 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Eye, EyeOff, AlertCircle } from "lucide-react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useAuth } from "@/context/auth-context";
+import { useRouter } from "next/navigation";
 
 export default function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -13,31 +15,28 @@ export default function LoginForm() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const { login } = useAuth();
+  const router = useRouter();
 
-  const handleLogin = async (e: React.FormEvent) => {
+  useEffect(() => {
+    if (!error) return;
+    const t = setTimeout(() => setError(""), 2000);
+    return () => clearTimeout(t);
+  }, [error]);
+
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     setError("");
-
-    // TODO: Replace with real Entra External ID auth call
-    await new Promise((r) => setTimeout(r, 1500));
-
-    if (email === "" || password === "") {
-      setError("Please enter your credentials.");
+    try {
+      await login(email, password);
+      router.push("/overview");
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Login failed. Please try again.";
+      setError(message);
+    } finally {
       setLoading(false);
-      return;
     }
-
-    // Simulate role-based redirect
-    if (email.includes("admin")) {
-      window.location.href = "/overview";
-    } else if (email.includes("compliance")) {
-      window.location.href = "/compliance";
-    } else {
-      window.location.href = "/overview";
-    }
-
-    setLoading(false);
   };
 
   return (

@@ -48,8 +48,8 @@ export function NigeriaMap() {
         style={{ width: "100%", height: "100%" }}
       >
         <Geographies geography={GEO_URL}>
-          {({ geographies }) =>
-            geographies.map((geo) => {
+          {({ geographies }: { geographies: any[] }) =>
+            geographies.map((geo: any) => {
               const name: string = geo.properties.name ?? "";
               return (
                 <Geography
