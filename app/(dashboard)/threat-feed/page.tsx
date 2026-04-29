@@ -98,7 +98,7 @@ function ThreatFeedContent() {
 
       <div ref={tableRef} className="rounded-xl overflow-hidden" style={{ background: "#0f0f1a", border: "1px solid #1a1a2e" }}>
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="w-full" style={{ minWidth: 700 }}>
             <thead>
               <tr style={{ borderBottom: "1px solid #1a1a2e" }}>
                 {["ID", "Time", "Channel", "Preview", "Risk", "Status", ""].map((h) => (
@@ -120,13 +120,13 @@ function ThreatFeedContent() {
                       key={item.id}
                       style={{ borderBottom: index < rows.length - 1 ? "1px solid #13131f" : "none" }}
                     >
-                      <td className="px-4 py-3.5 text-sm font-mono font-medium" style={{ color: "#e8581a" }}>
+                      <td className="px-4 py-3.5 text-sm font-mono font-medium whitespace-nowrap" style={{ color: "#e8581a" }}>
                         {item.id}
                       </td>
-                      <td className="px-4 py-3.5 text-sm" style={{ color: "#9ca3af" }}>
+                      <td className="px-4 py-3.5 text-sm whitespace-nowrap" style={{ color: "#9ca3af" }}>
                         {formatTime(item.timestamp)}
                       </td>
-                      <td className="px-4 py-3.5 text-sm" style={{ color: "#9ca3af" }}>
+                      <td className="px-4 py-3.5 text-sm whitespace-nowrap" style={{ color: "#9ca3af" }}>
                         {item.channel.charAt(0) + item.channel.slice(1).toLowerCase()}
                       </td>
                       <td className="px-4 py-3.5 text-sm max-w-sm truncate" style={{ color: "#9ca3af" }}>
@@ -135,7 +135,7 @@ function ThreatFeedContent() {
                       <td className="px-4 py-3.5">
                         <RiskPill score={item.riskScore} />
                       </td>
-                      <td className="px-4 py-3.5 text-sm" style={{ color: "#9ca3af" }}>
+                      <td className="px-4 py-3.5 text-sm whitespace-nowrap" style={{ color: "#9ca3af" }}>
                         {statusLabel(item.status)}
                       </td>
                       <td className="px-4 py-3.5">

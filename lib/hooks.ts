@@ -1,6 +1,6 @@
 import useSWR from "swr";
 import { apiGet } from "./api";
-import type { IncidentsResponse, StatsResponse, UsersResponse } from "./types";
+import type { IncidentsResponse, StatsResponse, UsersResponse, HeatmapPoint, ReportsListResponse } from "./types";
 
 export function useIncidents(limit = 50) {
   return useSWR<IncidentsResponse>(
@@ -22,5 +22,20 @@ export function useUsers() {
   return useSWR<UsersResponse>(
     "/api/auth/users",
     (url: string) => apiGet<UsersResponse>(url)
+  );
+}
+
+export function useHeatmap() {
+  return useSWR<HeatmapPoint[]>(
+    "/api/incidents/heatmap",
+    (url: string) => apiGet<HeatmapPoint[]>(url),
+    { refreshInterval: 60_000 }
+  );
+}
+
+export function useReports(limit = 20) {
+  return useSWR<ReportsListResponse>(
+    `/api/reports?limit=${limit}`,
+    (url: string) => apiGet<ReportsListResponse>(url)
   );
 }

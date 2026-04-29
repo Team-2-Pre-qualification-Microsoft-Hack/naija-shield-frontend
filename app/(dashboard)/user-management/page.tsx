@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { AlertCircle, UserPlus, X } from "lucide-react";
+import { AlertCircle, UserPlus, X, Trash2 } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
-import { apiPost } from "@/lib/api";
+import { apiPost, apiDelete } from "@/lib/api";
 import { Spinner } from "@/components/ui/spinner";
 import { useUsers } from "@/lib/hooks";
 import { ROLE_LABEL, formatRelative, type UserRole } from "@/lib/types";
@@ -45,6 +45,8 @@ export default function UserManagementPage() {
   const [form, setForm] = useState<InviteForm>(EMPTY_FORM);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (!error) return;
@@ -75,6 +77,21 @@ export default function UserManagementPage() {
       setError(err instanceof Error ? err.message : "Failed to send invite.");
     } finally {
       setSubmitting(false);
+    }
+  }
+
+  async function handleDelete() {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    try {
+      await apiDelete(`/api/auth/users/${deleteTarget.id}`);
+      mutate();
+      setDeleteTarget(null);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to delete user.");
+      setDeleteTarget(null);
+    } finally {
+      setDeleting(false);
     }
   }
 
@@ -111,12 +128,12 @@ export default function UserManagementPage() {
 
       <div className="rounded-xl overflow-hidden" style={{ background: "#0f0f1a", border: "1px solid #1a1a2e" }}>
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="w-full" style={{ minWidth: 650 }}>
             <thead>
               <tr style={{ borderBottom: "1px solid #1a1a2e" }}>
-                {["Name", "Email", "Role", "Status", "Last Active"].map((head) => (
+                {["Name", "Email", "Role", "Status", "Last Active", ...(isAdmin ? [""] : [])].map((head) => (
                   <th
-                    key={head}
+                    key={head || "actions"}
                     className="text-left px-5 py-3.5 text-sm font-semibold"
                     style={{ color: "#9ca3af" }}
                   >
@@ -134,13 +151,13 @@ export default function UserManagementPage() {
                     key={user.id}
                     style={{ borderBottom: index < userList.length - 1 ? "1px solid #13131f" : "none" }}
                   >
-                    <td className="px-5 py-3.5 text-sm font-medium" style={{ color: "#f5ede8" }}>
+                    <td className="px-5 py-3.5 text-sm font-medium whitespace-nowrap" style={{ color: "#f5ede8" }}>
                       {user.name}
                     </td>
-                    <td className="px-5 py-3.5 text-sm" style={{ color: "#9ca3af" }}>
+                    <td className="px-5 py-3.5 text-sm whitespace-nowrap" style={{ color: "#9ca3af" }}>
                       {user.email}
                     </td>
-                    <td className="px-5 py-3.5 text-sm" style={{ color: "#9ca3af" }}>
+                    <td className="px-5 py-3.5 text-sm whitespace-nowrap" style={{ color: "#9ca3af" }}>
                       {ROLE_LABEL[user.role]}
                     </td>
                     <td className="px-5 py-3.5 text-sm">
@@ -160,9 +177,27 @@ export default function UserManagementPage() {
                         </span>
                       )}
                     </td>
-                    <td className="px-5 py-3.5 text-sm" style={{ color: "#9ca3af" }}>
+                    <td className="px-5 py-3.5 text-sm whitespace-nowrap" style={{ color: "#9ca3af" }}>
                       {formatRelative(user.lastActive)}
                     </td>
+                    {isAdmin && (
+                      <td className="px-5 py-3.5">
+                        {user.id !== currentUser?.id ? (
+                          <button
+                            onClick={() => setDeleteTarget({ id: user.id, name: user.name })}
+                            className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium transition-all"
+                            style={{ background: "#ef444410", border: "1px solid #ef444420", color: "#ef4444" }}
+                            onMouseEnter={(e) => { e.currentTarget.style.background = "#ef444420"; e.currentTarget.style.borderColor = "#ef444440"; }}
+                            onMouseLeave={(e) => { e.currentTarget.style.background = "#ef444410"; e.currentTarget.style.borderColor = "#ef444420"; }}
+                          >
+                            <Trash2 size={11} />
+                            Remove
+                          </button>
+                        ) : (
+                          <span className="text-xs" style={{ color: "#2a2a4a" }}>You</span>
+                        )}
+                      </td>
+                    )}
                   </tr>
                 ))
               )}
@@ -286,6 +321,68 @@ export default function UserManagementPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deleteTarget && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: "rgba(0,0,0,0.7)" }}
+          onClick={(e) => { if (e.target === e.currentTarget) setDeleteTarget(null); }}
+        >
+          <div
+            className="w-full max-w-sm rounded-xl p-6 space-y-4 animate-fade-up"
+            style={{ background: "#0f0f1a", border: "1px solid #1a1a2e" }}
+          >
+            <div className="flex items-center gap-3">
+              <div
+                className="w-10 h-10 rounded-full flex items-center justify-center shrink-0"
+                style={{ background: "#ef444415" }}
+              >
+                <Trash2 size={18} style={{ color: "#ef4444" }} />
+              </div>
+              <div>
+                <h2 className="text-sm font-semibold" style={{ color: "#f5ede8" }}>Remove User</h2>
+                <p className="text-xs mt-0.5" style={{ color: "#6b7280" }}>
+                  This action cannot be undone.
+                </p>
+              </div>
+            </div>
+
+            <p className="text-sm" style={{ color: "#9ca3af" }}>
+              Are you sure you want to remove <span style={{ color: "#f5ede8" }} className="font-semibold">{deleteTarget.name}</span> from NaijaShield?
+            </p>
+
+            <div className="flex gap-3 pt-1">
+              <button
+                type="button"
+                onClick={() => setDeleteTarget(null)}
+                className="flex-1 h-10 rounded-lg text-sm font-medium"
+                style={{ background: "#13131f", border: "1px solid #1a1a2e", color: "#6b7280" }}
+                onMouseEnter={(e) => (e.currentTarget.style.borderColor = "#2a2a4a")}
+                onMouseLeave={(e) => (e.currentTarget.style.borderColor = "#1a1a2e")}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleDelete}
+                disabled={deleting}
+                className="flex-1 h-10 flex items-center justify-center gap-2 rounded-lg text-sm font-semibold"
+                style={{ background: deleting ? "#991b1b" : "#ef4444", color: "white", border: "none" }}
+              >
+                {deleting ? (
+                  <>
+                    <Spinner />
+                    Removing...
+                  </>
+                ) : (
+                  "Remove User"
+                )}
+              </button>
+            </div>
           </div>
         </div>
       )}

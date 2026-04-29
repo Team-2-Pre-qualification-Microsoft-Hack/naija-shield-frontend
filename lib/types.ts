@@ -102,3 +102,82 @@ export function formatRelative(iso: string): string {
 export function statusLabel(status: IncidentStatus): string {
   return status.charAt(0) + status.slice(1).toLowerCase();
 }
+
+export type HeatmapPoint = {
+  id: string;
+  lat: number;
+  lng: number;
+  state: string;
+  lga: string;
+  weight: number;
+  status: IncidentStatus;
+  channel: IncidentChannel;
+  classification: IncidentClassification;
+};
+
+/* ── Report types (backend /api/reports) ── */
+
+export type AgencyType = "CBN" | "NCC" | "GENERAL";
+
+export type ReportRequest = {
+  agencyType: AgencyType;
+  periodFrom: string;
+  periodTo: string;
+  maxIncidentDetails: number;
+};
+
+export type ReportSummary = {
+  totalIncidents: number;
+  blocked: number;
+  monitoring: number;
+  allowed: number;
+  averageRiskScore: number;
+  interventionsTriggered: number;
+  uniqueSourceNumbers: number;
+};
+
+export type ReportIncident = {
+  id: string;
+  timestamp: string;
+  channel: string;
+  from: string;
+  classification: string;
+  riskScore: number;
+  status: string;
+  explanation: string;
+};
+
+export type ComplianceMetadata = {
+  framework: string;
+  dataProtection: string;
+  reportVersion: string;
+  classification: string;
+  reportingEntity: string;
+};
+
+export type ReportResponse = {
+  id: string;
+  agencyType: AgencyType;
+  generatedAt: string;
+  generatedBy: string;
+  periodFrom: string;
+  periodTo: string;
+  summary: ReportSummary;
+  byClassification: { classification: string; count: number; percentage: number }[];
+  byChannel: { channel: string; count: number; percentage: number }[];
+  byState: { state: string; count: number }[];
+  topIncidents: ReportIncident[];
+  complianceMetadata: ComplianceMetadata | null;
+  narrative: string;
+};
+
+export type ReportsListResponse = {
+  total: number;
+  items: ReportResponse[];
+};
+
+export const AGENCY_LABEL: Record<AgencyType, string> = {
+  CBN: "CBN Fraud Incident Report",
+  NCC: "NCC Incident Disclosure Report",
+  GENERAL: "Internal Summary Report",
+};

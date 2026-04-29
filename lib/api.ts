@@ -61,3 +61,6 @@ export const apiPost = <T>(path: string, body?: unknown) =>
 
 export const apiGet = <T>(path: string) =>
   request<T>(path, { method: "GET" });
+
+export const apiDelete = <T>(path: string) =>
+  request<T>(path, { method: "DELETE" });

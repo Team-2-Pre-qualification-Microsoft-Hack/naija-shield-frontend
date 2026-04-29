@@ -256,7 +256,7 @@ export default function OverviewPage() {
           </h2>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="w-full" style={{ minWidth: 700 }}>
             <thead>
               <tr style={{ borderBottom: "1px solid #1a1a2e" }}>
                 {["ID", "Time", "Channel", "Preview", "Risk", "Status", ""].map((h) => (
@@ -278,13 +278,13 @@ export default function OverviewPage() {
                       key={row.id}
                       style={{ borderBottom: i < rows.length - 1 ? "1px solid #13131f" : "none" }}
                     >
-                      <td className="px-5 py-3.5 text-sm font-mono font-medium" style={{ color: "#e8581a" }}>
+                      <td className="px-5 py-3.5 text-sm font-mono font-medium whitespace-nowrap" style={{ color: "#e8581a" }}>
                         {row.id}
                       </td>
-                      <td className="px-5 py-3.5 text-sm" style={{ color: "#9ca3af" }}>
+                      <td className="px-5 py-3.5 text-sm whitespace-nowrap" style={{ color: "#9ca3af" }}>
                         {formatTime(row.timestamp)}
                       </td>
-                      <td className="px-5 py-3.5 text-sm" style={{ color: "#9ca3af" }}>
+                      <td className="px-5 py-3.5 text-sm whitespace-nowrap" style={{ color: "#9ca3af" }}>
                         {row.channel}
                       </td>
                       <td className="px-5 py-3.5 text-sm max-w-xs truncate" style={{ color: "#9ca3af" }}>
@@ -293,7 +293,7 @@ export default function OverviewPage() {
                       <td className="px-5 py-3.5">
                         <RiskPill score={row.riskScore} />
                       </td>
-                      <td className="px-5 py-3.5 text-sm" style={{ color: "#9ca3af" }}>
+                      <td className="px-5 py-3.5 text-sm whitespace-nowrap" style={{ color: "#9ca3af" }}>
                         {row.status}
                       </td>
                       <td className="px-5 py-3.5">
