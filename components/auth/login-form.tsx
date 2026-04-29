@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Eye, EyeOff, AlertCircle } from "lucide-react";
+import { Eye, EyeOff, AlertCircle, CheckCircle2 } from "lucide-react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { useAuth } from "@/context/auth-context";
 import { useRouter } from "next/navigation";
 
-export default function LoginForm() {
+export default function LoginForm({ activated = false }: { activated?: boolean }) {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -69,6 +69,15 @@ export default function LoginForm() {
 
       {/* Form */}
       <form onSubmit={handleLogin} className="space-y-5">
+
+        {/* Activation success */}
+        {activated && (
+          <div className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm"
+            style={{ background: "#061a0f", border: "1px solid #10b98140", color: "#10b981" }}>
+            <CheckCircle2 size={14} className="shrink-0" />
+            Account activated! Sign in to continue.
+          </div>
+        )}
 
         {/* Error */}
         {error && (

@@ -1,7 +1,12 @@
 import LoginForm from "@/components/auth/login-form";
 import Image from "next/image";
 
-export default function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ activated?: string }>;
+}) {
+  const { activated } = await searchParams;
   return (
     <main className="min-h-screen w-full flex">
       {/* Left Panel — Branding */}
@@ -85,7 +90,7 @@ export default function LoginPage() {
       {/* Right Panel — Login Form */}
       <div className="flex-1 flex items-center justify-center p-8"
         style={{ background: "#09090f" }}>
-        <LoginForm />
+        <LoginForm activated={activated === "1"} />
       </div>
     </main>
   );

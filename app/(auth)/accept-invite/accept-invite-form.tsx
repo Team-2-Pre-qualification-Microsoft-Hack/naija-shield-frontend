@@ -5,15 +5,8 @@ import { Eye, EyeOff, AlertCircle } from "lucide-react";
 import Image from "next/image";
 import { Spinner } from "@/components/ui/spinner";
 import { apiPost } from "@/lib/api";
-import { setSession } from "@/lib/auth";
 import { useRouter } from "next/navigation";
-import type { AuthUser } from "@/lib/auth";
 
-type InviteAcceptResponse = {
-  token: string;
-  refreshToken: string;
-  user: AuthUser;
-};
 
 const ERROR_MAP: Record<string, string> = {
   PASSWORDS_DO_NOT_MATCH: "Passwords do not match.",
@@ -66,13 +59,12 @@ export function AcceptInviteForm({ token }: { token: string }) {
     setLoading(true);
     setError("");
     try {
-      const data = await apiPost<InviteAcceptResponse>("/api/auth/invite/accept", {
+      await apiPost("/api/auth/invite/accept", {
         inviteToken: token,
         password,
         confirmPassword,
       });
-      setSession(data.token, data.refreshToken, data.user);
-      router.push("/overview");
+      router.push("/login?activated=1");
     } catch (err: unknown) {
       const raw = err instanceof Error ? err.message : "Something went wrong.";
       setError(ERROR_MAP[raw] ?? raw);
