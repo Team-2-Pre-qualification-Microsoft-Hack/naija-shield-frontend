@@ -13,6 +13,7 @@ import {
   Users,
   Settings,
   LogOut,
+  Search,
 } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
 import { Spinner } from "@/components/ui/spinner";
@@ -24,6 +25,7 @@ const navItems: { href: string; label: string; icon: ElementType; roles: UserRol
   { href: "/compliance",      label: "Compliance",      icon: FileText,        roles: ["COMPLIANCE_OFFICER", "SYSTEM_ADMIN"] },
   { href: "/user-management", label: "User Management", icon: Users,           roles: ["SYSTEM_ADMIN"] },
   { href: "/settings",        label: "Settings",        icon: Settings,        roles: ["SYSTEM_ADMIN"] },
+  { href: "/lookup",          label: "Number Lookup",   icon: Search,          roles: ["SOC_ANALYST", "COMPLIANCE_OFFICER", "SYSTEM_ADMIN"] },
 ];
 
 export function MobileNav() {

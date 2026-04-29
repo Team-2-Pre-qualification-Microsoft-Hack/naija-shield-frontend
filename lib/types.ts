@@ -115,6 +115,31 @@ export type HeatmapPoint = {
   classification: IncidentClassification;
 };
 
+/* ── Number reputation ── */
+
+export type ReputationVerdict = "UNKNOWN" | "CLEAN" | "LOW_RISK" | "SUSPICIOUS" | "HIGH_RISK";
+
+export type NumberReputation = {
+  phone: string;
+  reputationScore: number;
+  verdict: ReputationVerdict;
+  totalIncidents: number;
+  message: string;
+  blockedCount?: number;
+  monitoringCount?: number;
+  allowedCount?: number;
+  classifications?: IncidentClassification[];
+  recentIncidents?: Array<{
+    id: string;
+    timestamp: string;
+    channel: IncidentChannel;
+    classification: IncidentClassification;
+    status: IncidentStatus;
+    riskScore: number;
+    preview: string;
+  }>;
+};
+
 /* ── Report types (backend /api/reports) ── */
 
 export type AgencyType = "CBN" | "NCC" | "GENERAL";
