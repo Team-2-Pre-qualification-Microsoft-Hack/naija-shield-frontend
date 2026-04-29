@@ -5,13 +5,8 @@ import { Eye, EyeOff, AlertCircle } from "lucide-react";
 import Image from "next/image";
 import { Spinner } from "@/components/ui/spinner";
 import { apiPost } from "@/lib/api";
+import { friendlyError } from "@/lib/errors";
 import { useRouter } from "next/navigation";
-
-
-const ERROR_MAP: Record<string, string> = {
-  PASSWORDS_DO_NOT_MATCH: "Passwords do not match.",
-  INVALID_INVITE: "This invite link is invalid, already used, or has expired.",
-};
 
 export function AcceptInviteForm({ token }: { token: string }) {
   const [password, setPassword] = useState("");
@@ -25,7 +20,7 @@ export function AcceptInviteForm({ token }: { token: string }) {
   // Auto-dismiss error after 2 s
   useEffect(() => {
     if (!error) return;
-    const t = setTimeout(() => setError(""), 2000);
+    const t = setTimeout(() => setError(""), 4000);
     return () => clearTimeout(t);
   }, [error]);
 
@@ -50,7 +45,7 @@ export function AcceptInviteForm({ token }: { token: string }) {
     );
   }
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: React.SyntheticEvent<HTMLFormElement>) {
     e.preventDefault();
     if (password !== confirmPassword) {
       setError("Passwords do not match.");
@@ -66,8 +61,7 @@ export function AcceptInviteForm({ token }: { token: string }) {
       });
       router.push("/login?activated=1");
     } catch (err: unknown) {
-      const raw = err instanceof Error ? err.message : "Something went wrong.";
-      setError(ERROR_MAP[raw] ?? raw);
+      setError(friendlyError(err));
     } finally {
       setLoading(false);
     }

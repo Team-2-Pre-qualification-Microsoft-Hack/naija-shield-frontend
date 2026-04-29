@@ -16,6 +16,7 @@ import { CLASSIFICATION_LABEL, AGENCY_LABEL } from "@/lib/types";
 import type { AgencyType, ReportRequest, ReportResponse } from "@/lib/types";
 import { generateReportPDF } from "@/lib/pdf-report";
 import { Spinner } from "@/components/ui/spinner";
+import { friendlyError } from "@/lib/errors";
 
 /* ── Period presets ── */
 type PeriodPreset = "1h" | "6h" | "24h" | "7d" | "30d" | "custom";
@@ -145,8 +146,8 @@ export default function CompliancePage() {
       refreshReports();
 
       setModalOpen(false);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to generate report.");
+    } catch (err: unknown) {
+      setError(friendlyError(err));
     } finally {
       setGenerating(false);
     }

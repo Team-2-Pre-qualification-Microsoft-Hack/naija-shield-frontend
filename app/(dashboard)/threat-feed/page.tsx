@@ -3,6 +3,7 @@
 import { useMemo, useState, useEffect, useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { useIncidents } from "@/lib/hooks";
+import { friendlyError } from "@/lib/errors";
 import {
   CLASSIFICATION_LABEL,
   formatTime,
@@ -84,7 +85,7 @@ function ThreatFeedContent() {
 
       {error && (
         <p className="text-sm" style={{ color: "#ef4444" }}>
-          Failed to load incidents. Please try again.
+          {friendlyError(error)}
         </p>
       )}
 

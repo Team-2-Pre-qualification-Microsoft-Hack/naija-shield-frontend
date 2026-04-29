@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/context/auth-context";
 import { useRouter } from "next/navigation";
+import { friendlyError } from "@/lib/errors";
 
 export default function LoginForm({ activated = false }: { activated?: boolean }) {
   const [showPassword, setShowPassword] = useState(false);
@@ -20,11 +21,11 @@ export default function LoginForm({ activated = false }: { activated?: boolean }
 
   useEffect(() => {
     if (!error) return;
-    const t = setTimeout(() => setError(""), 2000);
+    const t = setTimeout(() => setError(""), 4000);
     return () => clearTimeout(t);
   }, [error]);
 
-  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleLogin = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     setError("");
@@ -32,8 +33,7 @@ export default function LoginForm({ activated = false }: { activated?: boolean }
       await login(email, password);
       router.push("/overview");
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Login failed. Please try again.";
-      setError(message);
+      setError(friendlyError(err));
     } finally {
       setLoading(false);
     }

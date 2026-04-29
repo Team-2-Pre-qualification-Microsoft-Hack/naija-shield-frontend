@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { AlertCircle, UserPlus, X, Trash2 } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
 import { apiPost, apiDelete } from "@/lib/api";
+import { friendlyError } from "@/lib/errors";
 import { Spinner } from "@/components/ui/spinner";
 import { useUsers } from "@/lib/hooks";
 import { ROLE_LABEL, formatRelative, type UserRole } from "@/lib/types";
@@ -50,7 +51,7 @@ export default function UserManagementPage() {
 
   useEffect(() => {
     if (!error) return;
-    const t = setTimeout(() => setError(""), 2000);
+    const t = setTimeout(() => setError(""), 4000);
     return () => clearTimeout(t);
   }, [error]);
 
@@ -65,7 +66,7 @@ export default function UserManagementPage() {
     setError("");
   }
 
-  async function handleInvite(e: React.FormEvent) {
+  async function handleInvite(e: React.SyntheticEvent<HTMLFormElement>) {
     e.preventDefault();
     setSubmitting(true);
     setError("");
@@ -74,7 +75,7 @@ export default function UserManagementPage() {
       mutate();
       closeModal();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to send invite.");
+      setError(friendlyError(err));
     } finally {
       setSubmitting(false);
     }
@@ -88,7 +89,7 @@ export default function UserManagementPage() {
       mutate();
       setDeleteTarget(null);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to delete user.");
+      setError(friendlyError(err));
       setDeleteTarget(null);
     } finally {
       setDeleting(false);

@@ -25,6 +25,15 @@ async function refreshTokens(): Promise<string | null> {
   }
 }
 
+async function parseApiError(res: Response, fallback: string): Promise<string> {
+  try {
+    const body = await res.json();
+    return body.message || body.error || fallback;
+  } catch {
+    return fallback;
+  }
+}
+
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const token = getToken();
   const headers: Record<string, string> = {
@@ -36,6 +45,13 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   let res = await fetch(`${BASE}${path}`, { ...options, headers });
 
   if (res.status === 401) {
+    if (!token) {
+      // No token was sent — the 401 is a credential rejection from the endpoint itself.
+      // Surface the API's message directly instead of "Session expired".
+      throw new Error(await parseApiError(res, "Invalid credentials."));
+    }
+
+    // Had a token — attempt silent refresh.
     const newToken = await refreshTokens();
     if (newToken) {
       headers.Authorization = `Bearer ${newToken}`;
@@ -43,13 +59,12 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
     } else {
       clearSession();
       if (typeof window !== "undefined") window.location.href = "/login";
-      throw new Error("Session expired");
+      throw new Error("Your session has expired. Please sign in again.");
     }
   }
 
   if (!res.ok) {
-    const err = await res.json().catch(() => ({ message: "Request failed" }));
-    throw new Error(err.message || "Request failed");
+    throw new Error(await parseApiError(res, "Request failed. Please try again."));
   }
 
   const text = await res.text();

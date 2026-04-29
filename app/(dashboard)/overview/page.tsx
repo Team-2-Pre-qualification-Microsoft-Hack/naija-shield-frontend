@@ -153,8 +153,8 @@ function TableRowSkeleton() {
 }
 
 export default function OverviewPage() {
-  const { data: stats, isLoading: statsLoading } = useIncidentStats();
-  const { data: incidentsData, isLoading: incidentsLoading } = useIncidents(50);
+  const { data: stats, isLoading: statsLoading, error: statsError } = useIncidentStats();
+  const { data: incidentsData, isLoading: incidentsLoading, error: incidentsError } = useIncidents(50);
 
   const allIncidents: ApiIncident[] = incidentsData?.items ?? [];
   const rows = allIncidents.slice(0, 5);
@@ -183,6 +183,12 @@ export default function OverviewPage() {
           Open Threat Feed
         </Link>
       </div>
+
+      {(statsError || incidentsError) && (
+        <p className="text-sm" style={{ color: "#ef4444" }}>
+          Failed to load dashboard data. Please refresh.
+        </p>
+      )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         {statsLoading
