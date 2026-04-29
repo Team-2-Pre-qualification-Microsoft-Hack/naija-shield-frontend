@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useEffect, useRef } from "react";
+import { useMemo, useState, useEffect, useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { useIncidents } from "@/lib/hooks";
 import {
@@ -34,7 +34,7 @@ function RowSkeleton() {
   );
 }
 
-export default function ThreatFeedPage() {
+function ThreatFeedContent() {
   const { data, isLoading, error } = useIncidents(50);
   const searchParams = useSearchParams();
   const highlightId = searchParams.get("id");
@@ -192,5 +192,13 @@ export default function ThreatFeedPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function ThreatFeedPage() {
+  return (
+    <Suspense>
+      <ThreatFeedContent />
+    </Suspense>
   );
 }
