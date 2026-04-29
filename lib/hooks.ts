@@ -2,7 +2,7 @@ import useSWR from "swr";
 import { apiGet } from "./api";
 import type { IncidentsResponse, StatsResponse, UsersResponse, HeatmapPoint, ReportsListResponse } from "./types";
 
-export function useIncidents(limit = 50) {
+export function useIncidents(limit = 100) {
   return useSWR<IncidentsResponse>(
     `/api/incidents?limit=${limit}`,
     (url: string) => apiGet<IncidentsResponse>(url),

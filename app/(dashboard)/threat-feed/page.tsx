@@ -2,6 +2,7 @@
 
 import { useMemo, useState, useEffect, useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useIncidents } from "@/lib/hooks";
 import { friendlyError } from "@/lib/errors";
 import {
@@ -10,6 +11,8 @@ import {
   statusLabel,
   type ApiIncident,
 } from "@/lib/types";
+
+const PAGE_SIZE = 20;
 
 function RiskPill({ score }: { score: number }) {
   const color = score >= 80 ? "#ef4444" : score >= 50 ? "#f59e0b" : "#10b981";
@@ -36,10 +39,11 @@ function RowSkeleton() {
 }
 
 function ThreatFeedContent() {
-  const { data, isLoading, error } = useIncidents(50);
+  const { data, isLoading, error } = useIncidents(200);
   const searchParams = useSearchParams();
   const highlightId = searchParams.get("id");
   const [query, setQuery] = useState("");
+  const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<ApiIncident | null>(null);
   const detailRef = useRef<HTMLDivElement>(null);
   const tableRef = useRef<HTMLDivElement>(null);
@@ -60,7 +64,7 @@ function ThreatFeedContent() {
     }
   }, [selected]);
 
-  const rows = useMemo(() => {
+  const filteredRows = useMemo(() => {
     const value = query.trim().toLowerCase();
     if (!value) return allRows;
     return allRows.filter(
@@ -72,6 +76,12 @@ function ThreatFeedContent() {
     );
   }, [query, allRows]);
 
+  // Reset to page 1 whenever search query changes
+  useEffect(() => { setPage(1); }, [query]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredRows.length / PAGE_SIZE));
+  const rows = filteredRows.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
   return (
     <div className="p-6 space-y-5 min-h-screen">
       <div>
@@ -79,7 +89,7 @@ function ThreatFeedContent() {
           Threat Feed
         </h1>
         <p className="text-xs" style={{ color: "#6b7280" }}>
-          {isLoading ? "Loading…" : `${rows.length} intercept${rows.length !== 1 ? "s" : ""}`}
+          {isLoading ? "Loading…" : `${filteredRows.length} intercept${filteredRows.length !== 1 ? "s" : ""}`}
         </p>
       </div>
 
@@ -154,6 +164,36 @@ function ThreatFeedContent() {
           </table>
         </div>
       </div>
+
+      {!isLoading && totalPages > 1 && (
+        <div className="flex items-center justify-between px-1">
+          <p className="text-xs" style={{ color: "#6b7280" }}>
+            Page {page} of {totalPages}
+          </p>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => { setPage((p) => p - 1); tableRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }); }}
+              disabled={page === 1}
+              className="flex items-center justify-center w-8 h-8 rounded-lg transition-all"
+              style={page === 1
+                ? { background: "#0a0a14", border: "1px solid #13131f", color: "#2a2a4a", cursor: "not-allowed" }
+                : { background: "#e8581a18", border: "1px solid #e8581a50", color: "#e8581a" }}
+            >
+              <ChevronLeft size={14} />
+            </button>
+            <button
+              onClick={() => { setPage((p) => p + 1); tableRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }); }}
+              disabled={page === totalPages}
+              className="flex items-center justify-center w-8 h-8 rounded-lg transition-all"
+              style={page === totalPages
+                ? { background: "#0a0a14", border: "1px solid #13131f", color: "#2a2a4a", cursor: "not-allowed" }
+                : { background: "#e8581a18", border: "1px solid #e8581a50", color: "#e8581a" }}
+            >
+              <ChevronRight size={14} />
+            </button>
+          </div>
+        </div>
+      )}
 
       {selected && (
         <div
