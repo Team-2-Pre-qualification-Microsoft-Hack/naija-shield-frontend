@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ElementType } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -15,12 +15,14 @@ import {
 import { useAuth } from "@/context/auth-context";
 import { Spinner } from "@/components/ui/spinner";
 
-const navItems = [
-  { href: "/overview", label: "Command Centre", icon: LayoutDashboard },
-  { href: "/threat-feed", label: "Threat Feed", icon: Radio },
-  { href: "/compliance", label: "Compliance", icon: FileText },
-  { href: "/user-management", label: "User Management", icon: Users },
-  { href: "/settings", label: "Settings", icon: Settings },
+import type { UserRole } from "@/lib/auth";
+
+const navItems: { href: string; label: string; icon: ElementType; roles: UserRole[] }[] = [
+  { href: "/overview",        label: "Command Centre",  icon: LayoutDashboard, roles: ["SOC_ANALYST", "COMPLIANCE_OFFICER", "SYSTEM_ADMIN"] },
+  { href: "/threat-feed",     label: "Threat Feed",     icon: Radio,           roles: ["SOC_ANALYST", "SYSTEM_ADMIN"] },
+  { href: "/compliance",      label: "Compliance",      icon: FileText,        roles: ["COMPLIANCE_OFFICER", "SYSTEM_ADMIN"] },
+  { href: "/user-management", label: "User Management", icon: Users,           roles: ["SYSTEM_ADMIN"] },
+  { href: "/settings",        label: "Settings",        icon: Settings,        roles: ["SYSTEM_ADMIN"] },
 ];
 
 export default function Sidebar() {
@@ -35,7 +37,7 @@ export default function Sidebar() {
 
   return (
     <aside
-      className="hidden md:flex md:flex-col md:w-56 h-screen sticky top-0"
+      className="hidden lg:flex lg:flex-col lg:w-56 h-screen sticky top-0"
       style={{ background: "#09090f", borderRight: "1px solid #1a1a2e" }}
     >
       <div
@@ -56,7 +58,7 @@ export default function Sidebar() {
       </div>
 
       <nav className="flex-1 px-2 py-4 space-y-1">
-        {navItems.map(({ href, label, icon: Icon }) => {
+        {navItems.filter((item) => !user || item.roles.includes(user.role)).map(({ href, label, icon: Icon }) => {
           const active = pathname === href || pathname.startsWith(`${href}/`);
 
           return (

@@ -2,12 +2,13 @@
 
 import { useState, useEffect } from "react";
 import { AlertCircle, UserPlus, X } from "lucide-react";
-import { users } from "@/lib/mock-data";
 import { useAuth } from "@/context/auth-context";
 import { apiPost } from "@/lib/api";
 import { Spinner } from "@/components/ui/spinner";
+import { useUsers } from "@/lib/hooks";
+import { ROLE_LABEL, formatRelative, type UserRole } from "@/lib/types";
 
-type InviteRole = "SOC_ANALYST" | "COMPLIANCE_OFFICER" | "SYSTEM_ADMIN";
+type InviteRole = UserRole;
 
 type InviteForm = {
   name: string;
@@ -15,17 +16,30 @@ type InviteForm = {
   role: InviteRole;
 };
 
-const ROLE_LABELS: Record<InviteRole, string> = {
-  SOC_ANALYST: "SOC Analyst",
-  COMPLIANCE_OFFICER: "Compliance Officer",
-  SYSTEM_ADMIN: "System Admin",
-};
-
 const EMPTY_FORM: InviteForm = { name: "", email: "", role: "SOC_ANALYST" };
+
+function TableSkeleton() {
+  return (
+    <>
+      {Array.from({ length: 4 }).map((_, i) => (
+        <tr key={i} style={{ borderBottom: "1px solid #13131f" }}>
+          {[120, 160, 100, 60, 80].map((w, j) => (
+            <td key={j} className="px-5 py-3.5">
+              <div className="h-3 rounded animate-pulse" style={{ width: w, background: "#1a1a2e" }} />
+            </td>
+          ))}
+        </tr>
+      ))}
+    </>
+  );
+}
 
 export default function UserManagementPage() {
   const { user: currentUser } = useAuth();
   const isAdmin = currentUser?.role === "SYSTEM_ADMIN";
+
+  const { data, isLoading, error: fetchError, mutate } = useUsers();
+  const userList = data?.users ?? [];
 
   const [modalOpen, setModalOpen] = useState(false);
   const [form, setForm] = useState<InviteForm>(EMPTY_FORM);
@@ -55,6 +69,7 @@ export default function UserManagementPage() {
     setError("");
     try {
       await apiPost("/api/auth/invite", form);
+      mutate();
       closeModal();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to send invite.");
@@ -88,29 +103,72 @@ export default function UserManagementPage() {
         )}
       </div>
 
+      {fetchError && (
+        <p className="text-sm" style={{ color: "#ef4444" }}>
+          Failed to load users. Please refresh.
+        </p>
+      )}
+
       <div className="rounded-xl overflow-hidden" style={{ background: "#0f0f1a", border: "1px solid #1a1a2e" }}>
-        <table className="w-full">
-          <thead>
-            <tr style={{ borderBottom: "1px solid #1a1a2e" }}>
-              {["Name", "Email", "Role", "Status", "Last Active"].map((head) => (
-                <th key={head} className="text-left px-5 py-3.5 text-sm font-semibold" style={{ color: "#9ca3af" }}>
-                  {head}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {users.map((user, index) => (
-              <tr key={user.id} style={{ borderBottom: index < users.length - 1 ? "1px solid #13131f" : "none" }}>
-                <td className="px-5 py-3.5 text-sm font-medium" style={{ color: "#f5ede8" }}>{user.name}</td>
-                <td className="px-5 py-3.5 text-sm" style={{ color: "#9ca3af" }}>{user.email}</td>
-                <td className="px-5 py-3.5 text-sm" style={{ color: "#9ca3af" }}>{user.role}</td>
-                <td className="px-5 py-3.5 text-sm" style={{ color: "#9ca3af" }}>{user.status}</td>
-                <td className="px-5 py-3.5 text-sm" style={{ color: "#9ca3af" }}>{user.lastActive}</td>
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr style={{ borderBottom: "1px solid #1a1a2e" }}>
+                {["Name", "Email", "Role", "Status", "Last Active"].map((head) => (
+                  <th
+                    key={head}
+                    className="text-left px-5 py-3.5 text-sm font-semibold"
+                    style={{ color: "#9ca3af" }}
+                  >
+                    {head}
+                  </th>
+                ))}
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {isLoading ? (
+                <TableSkeleton />
+              ) : (
+                userList.map((user, index) => (
+                  <tr
+                    key={user.id}
+                    style={{ borderBottom: index < userList.length - 1 ? "1px solid #13131f" : "none" }}
+                  >
+                    <td className="px-5 py-3.5 text-sm font-medium" style={{ color: "#f5ede8" }}>
+                      {user.name}
+                    </td>
+                    <td className="px-5 py-3.5 text-sm" style={{ color: "#9ca3af" }}>
+                      {user.email}
+                    </td>
+                    <td className="px-5 py-3.5 text-sm" style={{ color: "#9ca3af" }}>
+                      {ROLE_LABEL[user.role]}
+                    </td>
+                    <td className="px-5 py-3.5 text-sm">
+                      {user.invitePending ? (
+                        <span
+                          className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold"
+                          style={{ color: "#f59e0b", background: "#f59e0b15" }}
+                        >
+                          Invite Pending
+                        </span>
+                      ) : (
+                        <span
+                          className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold"
+                          style={{ color: "#10b981", background: "#10b98115" }}
+                        >
+                          Active
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-5 py-3.5 text-sm" style={{ color: "#9ca3af" }}>
+                      {formatRelative(user.lastActive)}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {modalOpen && (
@@ -126,7 +184,9 @@ export default function UserManagementPage() {
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-sm font-semibold" style={{ color: "#f5ede8" }}>Invite a user</h2>
-                <p className="text-xs mt-0.5" style={{ color: "#6b7280" }}>They will receive an email to set their password.</p>
+                <p className="text-xs mt-0.5" style={{ color: "#6b7280" }}>
+                  They will receive an email to set their password.
+                </p>
               </div>
               <button
                 onClick={closeModal}
@@ -140,8 +200,10 @@ export default function UserManagementPage() {
             </div>
 
             {error && (
-              <div className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm"
-                style={{ background: "#130a0a", border: "1px solid #ef444440", color: "#ef4444" }}>
+              <div
+                className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm"
+                style={{ background: "#130a0a", border: "1px solid #ef444440", color: "#ef4444" }}
+              >
                 <AlertCircle size={14} className="shrink-0" />
                 {error}
               </div>
@@ -188,9 +250,9 @@ export default function UserManagementPage() {
                   onFocus={(e) => (e.currentTarget.style.borderColor = "#e8581a")}
                   onBlur={(e) => (e.currentTarget.style.borderColor = "#1a1a2e")}
                 >
-                  {(Object.keys(ROLE_LABELS) as InviteRole[]).map((r) => (
+                  {(Object.keys(ROLE_LABEL) as InviteRole[]).map((r) => (
                     <option key={r} value={r} style={{ background: "#13131f" }}>
-                      {ROLE_LABELS[r]}
+                      {ROLE_LABEL[r]}
                     </option>
                   ))}
                 </select>

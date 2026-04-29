@@ -4,7 +4,7 @@ import type { NextRequest } from "next/server";
 // Redirect to /overview if already authenticated
 const PUBLIC_ROUTES = ["/login"];
 // Always accessible regardless of auth state
-const OPEN_ROUTES = ["/accept-invite"];
+const OPEN_ROUTES = ["/accept-invite", "/invite/accept"];
 
 const ROLE_ROUTES: Record<string, string[]> = {
   "/overview":        ["SOC_ANALYST", "COMPLIANCE_OFFICER", "SYSTEM_ADMIN"],
@@ -37,7 +37,10 @@ export function proxy(req: NextRequest) {
   }
 
   const matchedRoute = Object.keys(ROLE_ROUTES).find((r) => pathname.startsWith(r));
-  if (matchedRoute && role) {
+  if (matchedRoute) {
+    if (!role) {
+      return NextResponse.redirect(new URL("/login", req.url));
+    }
     const allowed = ROLE_ROUTES[matchedRoute];
     if (!allowed.includes(role)) {
       return NextResponse.redirect(new URL("/overview", req.url));

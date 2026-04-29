@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ElementType } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -16,13 +16,14 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
 import { Spinner } from "@/components/ui/spinner";
+import type { UserRole } from "@/lib/auth";
 
-const navItems = [
-  { href: "/overview",         label: "Command Centre",   icon: LayoutDashboard },
-  { href: "/threat-feed",      label: "Threat Feed",      icon: Radio },
-  { href: "/compliance",       label: "Compliance",       icon: FileText },
-  { href: "/user-management",  label: "User Management",  icon: Users },
-  { href: "/settings",         label: "Settings",         icon: Settings },
+const navItems: { href: string; label: string; icon: ElementType; roles: UserRole[] }[] = [
+  { href: "/overview",        label: "Command Centre",  icon: LayoutDashboard, roles: ["SOC_ANALYST", "COMPLIANCE_OFFICER", "SYSTEM_ADMIN"] },
+  { href: "/threat-feed",     label: "Threat Feed",     icon: Radio,           roles: ["SOC_ANALYST", "SYSTEM_ADMIN"] },
+  { href: "/compliance",      label: "Compliance",      icon: FileText,        roles: ["COMPLIANCE_OFFICER", "SYSTEM_ADMIN"] },
+  { href: "/user-management", label: "User Management", icon: Users,           roles: ["SYSTEM_ADMIN"] },
+  { href: "/settings",        label: "Settings",        icon: Settings,        roles: ["SYSTEM_ADMIN"] },
 ];
 
 export function MobileNav() {
@@ -40,13 +41,13 @@ export function MobileNav() {
     <>
       {/* Sticky top header */}
       <header
-        className="md:hidden sticky top-0 z-30 flex items-center justify-between px-4 py-3"
+        className="lg:hidden sticky top-0 z-30 flex items-center justify-between px-4 py-3"
         style={{ background: "#09090f", borderBottom: "1px solid #1a1a2e" }}
       >
-        <div className="flex items-center gap-2">
+        <Link href="/overview" className="flex items-center gap-2">
           <Image src="/logo.svg" alt="NaijaShield" width={120} height={38} className="h-6 w-auto" priority />
           <span className="text-sm font-semibold" style={{ color: "#f5ede8" }}>NaijaShield</span>
-        </div>
+        </Link>
         <button
           onClick={() => setOpen(true)}
           className="flex items-center justify-center w-9 h-9 rounded-lg transition-colors"
@@ -61,14 +62,14 @@ export function MobileNav() {
 
       {/* Backdrop */}
       <div
-        className={`md:hidden fixed inset-0 z-40 transition-opacity duration-300 ${open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
+        className={`lg:hidden fixed inset-0 z-40 transition-opacity duration-300 ${open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
         style={{ background: "rgba(0,0,0,0.65)" }}
         onClick={() => setOpen(false)}
       />
 
       {/* Drawer */}
       <div
-        className={`md:hidden fixed inset-y-0 left-0 z-50 w-72 flex flex-col transition-transform duration-300 ${open ? "translate-x-0" : "-translate-x-full"}`}
+        className={`lg:hidden fixed inset-y-0 left-0 z-50 w-72 flex flex-col transition-transform duration-300 ${open ? "translate-x-0" : "-translate-x-full"}`}
         style={{ background: "#09090f", borderRight: "1px solid #1a1a2e" }}
       >
         {/* Drawer header */}
@@ -94,7 +95,7 @@ export function MobileNav() {
 
         {/* Nav items */}
         <nav className="flex-1 px-2 py-4 space-y-1 overflow-y-auto">
-          {navItems.map(({ href, label, icon: Icon }) => {
+          {navItems.filter((item) => !user || item.roles.includes(user.role)).map(({ href, label, icon: Icon }) => {
             const active = pathname === href || pathname.startsWith(`${href}/`);
             return (
               <Link
