@@ -4,7 +4,7 @@ import type { NextRequest } from "next/server";
 // Redirect to /overview if already authenticated
 const PUBLIC_ROUTES = ["/login"];
 // Always accessible regardless of auth state
-const OPEN_ROUTES = ["/accept-invite", "/invite/accept", "/lookup"];
+const OPEN_ROUTES = ["/accept-invite", "/invite/accept", "/lookup", "/users/lookup"];
 
 const ROLE_ROUTES: Record<string, string[]> = {
   "/overview":        ["SOC_ANALYST", "COMPLIANCE_OFFICER", "SYSTEM_ADMIN"],
